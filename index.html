@@ -8,6 +8,7 @@
 
     <title>Valoració del menjar</title>
 
+
     
 </head>
 
@@ -67,6 +68,17 @@
         <span>10 · Excel·lent</span>
     </div>
 
+    <div class="question">
+        Comentari (opcional)
+
+    </div>
+
+    <textarea
+        id="comment"
+        placeholder="Escriu el teu comentari aquí..."
+        rows="5">  
+    </textarea>
+
     <button
         class="submit"
         id="submit"
@@ -80,6 +92,13 @@
 
 </div>
 
+<footer>
+    <div class="footer">
+        <p>
+            Desenvolupat per Eduard Penya
+        </p>
+    </div>
+</footer>
 
 <script>
 
@@ -102,6 +121,9 @@
 
     const meal =
         document.getElementById("meal");
+
+    const comment =
+    document.getElementById("comment");
 
     const submit =
         document.getElementById("submit");
@@ -188,6 +210,11 @@
                 selectedScore
             );
 
+            data.append(
+                "comment",
+                comment.value
+            );
+
 
             fetch(
                 SCRIPT_URL,
@@ -237,6 +264,8 @@
     );
 
 </script>
+
+<br>
 
 </body>
 </html>
