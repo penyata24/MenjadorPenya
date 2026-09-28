@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="ca">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+
+    <title>Valoració del menjar</title>
+
+    
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Valora el menjar</h1>
+
+    <div class="subtitle">
+        Només et prendrà uns segons
+    </div>
+
+    <div class="question">
+        Quin àpat vols valorar?
+    </div>
+
+    <select id="meal">
+        <option value="">
+            Selecciona...
+        </option>
+
+        <option value="Esmorzar">
+            Esmorzar
+        </option>
+
+        <option value="Dinar">
+            Dinar
+        </option>
+
+        <option value="Sopar">
+            Sopar
+        </option>
+    </select>
+
+    <div class="question">
+        Grau de satisfacció general amb el menjar d'avui
+    </div>
+
+    <div class="scale">
+
+        <button class="score" data-score="1">1</button>
+        <button class="score" data-score="2">2</button>
+        <button class="score" data-score="3">3</button>
+        <button class="score" data-score="4">4</button>
+        <button class="score" data-score="5">5</button>
+        <button class="score" data-score="6">6</button>
+        <button class="score" data-score="7">7</button>
+        <button class="score" data-score="8">8</button>
+        <button class="score" data-score="9">9</button>
+        <button class="score" data-score="10">10</button>
+
+    </div>
+
+    <div class="labels">
+        <span>1 · Molt dolent</span>
+        <span>10 · Excel·lent</span>
+    </div>
+
+    <button
+        class="submit"
+        id="submit"
+        disabled>
+        Enviar valoració
+    </button>
+
+    <div id="success">
+        ✓ Gràcies per la teva valoració!
+    </div>
+
+</div>
+
+
+<script>
+
+    // ==========================================
+    // URL DE GOOGLE APPS SCRIPT
+    // ==========================================
+
+    const SCRIPT_URL =
+        "https://script.google.com/macros/s/AKfycbxpi485PMVjoGxBCIVx1XKZrY6zZr5LLKmAXUAPPVUFFeUdJm6jnvGfKhZ4C0T4PCZv/exec";
+
+
+    // ==========================================
+    // VARIABLES
+    // ==========================================
+
+    let selectedScore = null;
+
+    const scoreButtons =
+        document.querySelectorAll(".score");
+
+    const meal =
+        document.getElementById("meal");
+
+    const submit =
+        document.getElementById("submit");
+
+
+    // ==========================================
+    // SELECCIONAR PUNTUACIÓN
+    // ==========================================
+
+    scoreButtons.forEach(button => {
+
+        button.addEventListener("click", () => {
+
+            scoreButtons.forEach(btn => {
+                btn.classList.remove("selected");
+            });
+
+            button.classList.add("selected");
+
+            selectedScore =
+                button.dataset.score;
+
+            checkForm();
+        });
+
+    });
+
+
+    // ==========================================
+    // CAMBIO DE COMIDA
+    // ==========================================
+
+    meal.addEventListener(
+        "change",
+        checkForm
+    );
+
+
+    // ==========================================
+    // COMPROBAR SI SE PUEDE ENVIAR
+    // ==========================================
+
+    function checkForm() {
+
+        if (
+            meal.value !== "" &&
+            selectedScore !== null
+        ) {
+
+            submit.disabled = false;
+
+        } else {
+
+            submit.disabled = true;
+
+        }
+    }
+
+
+    // ==========================================
+    // ENVIAR VALORACIÓN
+    // ==========================================
+
+    submit.addEventListener(
+        "click",
+        () => {
+
+            submit.disabled = true;
+
+            submit.textContent =
+                "Enviant...";
+
+
+            const data =
+                new URLSearchParams();
+
+            data.append(
+                "meal",
+                meal.value
+            );
+
+            data.append(
+                "score",
+                selectedScore
+            );
+
+
+            fetch(
+                SCRIPT_URL,
+                {
+                    method: "POST",
+                    body: data
+                }
+            )
+            .then(() => {
+
+                document.querySelector(
+                    ".container"
+                ).innerHTML = `
+
+                    <h1>✓ Gràcies!</h1>
+
+                    <p>
+                        La teva valoració s'ha registrat.
+                    </p>
+
+                    <p>
+                        Gràcies per participar.
+                    </p>
+
+                `;
+
+            })
+            .catch(error => {
+
+                console.error(
+                    "Error:",
+                    error
+                );
+
+                submit.disabled = false;
+
+                submit.textContent =
+                    "Enviar valoració";
+
+                alert(
+                    "No s'ha pogut enviar la valoració. Torna-ho a provar."
+                );
+
+            });
+
+        }
+    );
+
+</script>
+
+</body>
+</html>
