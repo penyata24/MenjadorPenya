@@ -1,110 +1,86 @@
 <!DOCTYPE html>
 <html lang="ca">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
-    
-
-    <title>Valoració del menjar</title>
-
-
-    
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Valoració del menjar</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;font-family:Arial,sans-serif;background:#ddd url('OIP.webp') center/cover fixed;display:flex;justify-content:center;align-items:center;padding:20px 20px 60px}
+.container{width:100%;max-width:500px;background:rgba(255,255,255,.6);border-radius:20px;padding:30px 20px;text-align:center}
+h1{margin-top:0;font-size:27px}
+.subtitle{margin-bottom:30px}
+.question{font-size:18px;font-weight:bold;margin-bottom:15px}
+select,textarea{width:100%;padding:15px;font-size:16px;border:0;border-radius:12px;background:#fff;margin-bottom:30px}
+select{font-size:18px}
+textarea{resize:vertical;min-height:120px}
+textarea:focus{outline:1px solid #000}
+.slider-value{font-size:32px;font-weight:bold;margin-bottom:20px}
+.slider-value small{font-size:18px;color:#777;font-weight:normal}
+#score{width:100%;cursor:pointer;accent-color:#222}
+.labels{display:flex;justify-content:space-between;font-size:13px;margin:12px 0 30px}
+button{width:100%;padding:16px;border:0;border-radius:12px;background:#222;color:#fff;font-size:18px;font-weight:bold;cursor:pointer}
+button:disabled{background:#ccc;cursor:not-allowed}
+footer{position:fixed;bottom:0;left:0;width:100%;padding:8px;text-align:center;font-size:14px;background:#ccc}
+</style>
 </head>
-
 <body>
 
-<div class="container">
+<div class="container" id="box">
+  <h1>Valora el menjar</h1>
+  <div class="subtitle">Només et prendrà uns segons</div>
 
-    <h1>Valora el menjar</h1>
+  <div class="question">Quin àpat vols valorar?</div>
+  <select id="meal">
+    <option value="">Selecciona...</option>
+    <option>Esmorzar</option>
+    <option>Dinar</option>
+    <option>Sopar</option>
+  </select>
 
-    <div class="subtitle">
-        Només et prendrà uns segons
-    </div>
+  <div class="question">Grau de satisfacció general amb el menjar d'avui</div>
+  <div class="slider-value"><span id="val">5</span> <small>/ 10</small></div>
+  <input type="range" id="score" min="1" max="10" value="5">
+  <div class="labels"><span>1 · Molt dolent</span><span>10 · Excel·lent</span></div>
 
-    <label class="question" for="meal">
-    Quin àpat vols valorar?
-    </label>
+  <div class="question">Comentari (opcional)</div>
+  <textarea id="comment" rows="5" placeholder="Escriu el teu comentari aquí..."></textarea>
 
-    <select id="meal">
-        <option value="">
-            Selecciona...
-        </option>
-
-        <option value="Esmorzar">
-            Esmorzar
-        </option>
-
-        <option value="Dinar">
-            Dinar
-        </option>
-
-        <option value="Sopar">
-            Sopar
-        </option>
-    </select>
-
-    <label class="question" for="scoreSlider">
-        Grau de satisfacció general amb el menjar d'avui
-    </label>
-
-    <div class="slider-container">
-
-    <div class="slider-value">
-        <span id="sliderValue">5</span>
-        <span>/ 10</span>
-    </div>
-
-    <input
-        type="range"
-        id="scoreSlider"
-        min="1"
-        max="10"
-        value="5"
-        step="1"
-    >
-
+  <button id="send" disabled>Enviar valoració</button>
 </div>
 
-    <div class="labels">
-        <span>1 · Molt dolent</span>
-        <span>10 · Excel·lent</span>
-    </div>
+<footer>ComiMenjador 2026 - Col·legi Major Penyafort-Montserrat</footer>
 
-    <label class="question" for="comment">
-        Comentari (opcional)
-    </label>
+<script>
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwnpvz1oPMxSxLYOq-8LpWnhuGwkQxHWeFz_iUoLXz8Abdb30EhL4C5EozH4q0-kQdP/exec";
+const $ = id => document.getElementById(id);
+const box = $("box");
 
-    <textarea
-        id="comment"
-        placeholder="Escriu el teu comentari aquí..."
-        rows="4"
-    ></textarea>
+// Bloqueo de 4 h comprobado en el navegador (instantáneo)
+if (Date.now() - (localStorage.lastVote || 0) < 4 * 3600 * 1000) {
+  box.innerHTML = "<h1>⏱️ Ja has votat</h1><p>Ja has enviat una valoració durant les últimes 4 hores.</p><p>Podràs tornar a valorar més endavant.</p>";
+}
 
-    <button
-        class="submit"
-        id="submit"
-        disabled>
-        Enviar valoració
-    </button>
+const userId = localStorage.userId || (localStorage.userId = crypto.randomUUID());
 
-    <div id="success">
-        ✓ Gràcies per la teva valoració!
-    </div>
+$("score").oninput = e => $("val").textContent = e.target.value;
+$("meal").onchange = e => $("send").disabled = !e.target.value;
 
-</div>
+$("send").onclick = () => {
+  const data = new URLSearchParams({
+    meal: $("meal").value,
+    score: $("score").value,
+    comment: $("comment").value.trim(),
+    userId
+  });
 
-<footer>
-    <div class="footer">
-        <p>
-            ComiMenjador 2026       -        Col·legi Major Penyafort-Montserrat
-        </p>
-    </div>
-</footer>
+  // Enviar en segundo plano, sin esperar respuesta
+  fetch(SCRIPT_URL, { method: "POST", body: data, mode: "no-cors", keepalive: true });
+  localStorage.lastVote = Date.now();
 
-<script src="script.js" defer></script>
-
-
+  // Mostrar agradecimiento al instante
+  box.innerHTML = "<h1>✓ Gràcies!</h1><p>La teva valoració s'ha registrat.</p><p>Gràcies per participar.</p>";
+};
+</script>
 </body>
 </html>
